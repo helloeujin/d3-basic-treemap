@@ -24,7 +24,7 @@ let data = [];
 let hierarchicalData, hierarchy;
 let treemap, root;
 
-d3.csv("/data/population_bycountry.csv")
+d3.csv("data/population_bycountry.csv")
   .then((raw_data) => {
     // data parsing
     data = raw_data.map((d) => {
