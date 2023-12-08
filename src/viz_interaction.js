@@ -119,3 +119,32 @@ d3.csv("data/population_bycountry.csv")
   .catch((error) => {
     console.error("Error loading CSV data: ", error);
   });
+
+////////////////////////////////////////////////////////////////////
+////////////////////////////  Resize  //////////////////////////////
+window.addEventListener("resize", () => {
+  //  width, height updated
+  width = parseInt(d3.select("#svg-container").style("width"));
+  height = parseInt(d3.select("#svg-container").style("height"));
+
+  // treemap
+  treemap.size([width, height]);
+
+  root = treemap(hierarchy);
+
+  // leaves
+  leaf.attr("transform", (d) => `translate(${d.x0},${d.y0})`);
+
+  leaf
+    .selectAll("rect")
+    .attr("width", (d) => d.x1 - d.x0)
+    .attr("height", (d) => d.y1 - d.y0);
+
+  leaf
+    .selectAll("text")
+    .attr("width", (d) => d.x1 - d.x0)
+    .attr("height", (d) => d.y1 - d.y0);
+
+  //  region text
+  region.attr("x", (d) => d.x0).attr("y", (d) => d.y0 + 2);
+});
