@@ -4,7 +4,6 @@ import "./viz.css";
 ////////////////////////////////////////////////////////////////////
 ////////////////////////////  Init  ///////////////////////////////
 const svg = d3.select("#svg-container").append("svg").attr("id", "svg");
-// const g = svg.append("g"); // group
 
 let width = parseInt(d3.select("#svg-container").style("width"));
 let height = parseInt(d3.select("#svg-container").style("height"));
@@ -21,7 +20,7 @@ let leaf, region;
 ////////////////////////////////////////////////////////////////////
 ////////////////////////////  Load CSV  ////////////////////////////
 let data = [];
-let hierarchicalData, hierarchy;
+let hierarchicalData;
 let treemap, root;
 
 d3.csv("data/population_bycountry.csv")
@@ -33,26 +32,23 @@ d3.csv("data/population_bycountry.csv")
       return d;
     });
 
-    // Transform the flat data into a hierarchical format
-    hierarchicalData = {
-      name: "root",
-      children: Array.from(
-        d3.group(data, (d) => d.region),
-        ([region, children]) => ({
-          name: region,
-          children: children.map((c) => ({
-            name: c.name,
-            value: c.Population,
-            region: c.region,
-          })),
-        })
-      ),
-    };
+    // make a root
+    const rootData = [
+      { name: "world", region: "" },
+      { name: "asia", region: "world" },
+      { name: "europe", region: "world" },
+      { name: "americas", region: "world" },
+      { name: "africa", region: "world" },
+    ];
 
-    // Create a d3.hierarchy object and sum the values
-    hierarchy = d3
-      .hierarchy(hierarchicalData)
-      .sum((d) => d.value)
+    //  stratify (csv to hierachy)
+    const stratify = d3
+      .stratify()
+      .id((d) => d.name)
+      .parentId((d) => d.region);
+
+    hierarchicalData = stratify(data.concat(rootData))
+      .sum((d) => d.Population)
       .sort((a, b) => b.value - a.value);
 
     // treemap
@@ -66,7 +62,7 @@ d3.csv("data/population_bycountry.csv")
       .paddingRight(3)
       .round(true);
 
-    root = treemap(hierarchy);
+    root = treemap(hierarchicalData);
 
     //  scale updated
     colorScale.domain(root.children.map((d) => d.data.name));
