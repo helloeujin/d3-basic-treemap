@@ -26,6 +26,7 @@ let treemap, root;
 
 d3.csv("data/population_bycountry.csv")
   .then((raw_data) => {
+    // console.log(raw_data);
     // data parsing
     data = raw_data.map((d) => {
       d.Population = parseInt(d.Population);
@@ -52,6 +53,8 @@ d3.csv("data/population_bycountry.csv")
       .sum((d) => d.Population)
       .sort((a, b) => b.value - a.value);
 
+    // console.log(hierarchicalData);
+
     // treemap
     treemap = d3
       .treemap()
@@ -60,13 +63,16 @@ d3.csv("data/population_bycountry.csv")
       .paddingTop(16)
       .paddingBottom(9)
       .paddingLeft(3)
-      .paddingRight(3)
-      .round(true);
+      .paddingRight(3);
+    // .round(true);
 
     root = treemap(hierarchicalData);
+    // console.log(root);
 
     //  scale updated
     colorScale.domain(root.children.map((d) => d.data.name));
+
+    // console.log(root.leaves());
 
     // leaves
     leaf = svg
@@ -126,8 +132,9 @@ window.addEventListener("resize", () => {
 
   // treemap
   treemap.size([width, height]);
-
   root = treemap(hierarchicalData);
+
+  // leaf.data(root.leaves());
 
   // leaves
   leaf.attr("transform", (d) => `translate(${d.x0},${d.y0})`);
@@ -139,6 +146,7 @@ window.addEventListener("resize", () => {
 
   leaf
     .selectAll("text")
+    .style("opacity", (d) => (d.x1 - d.x0 < 40 || d.y1 - d.y0 < 25 ? 0 : 1))
     .attr("width", (d) => d.x1 - d.x0)
     .attr("height", (d) => d.y1 - d.y0);
 
